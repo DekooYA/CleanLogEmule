@@ -1,19 +1,17 @@
 @echo off
-REM Устанавливаем кодировку UTF-8
+
 chcp 65001>nul
 
-REM Очищаем экран для удобства
+
 cls
 
-REM Выводим заголовок
 echo ==================================================
 echo     ОЧИСТКА ЛОГОВ НА ВСЕХ ЭМУЛЯТОРАХ
 echo ==================================================
 
-REM Указываем путь к логам, которые нужно очистить
 set "LOG_PATH=/storage/emulated/0/Android/data/com.mega.app/files/LogFiles/*"
 
-REM Проверяем, доступен ли adb
+
 echo Проверка доступности ADB...
 adb version >nul 2>&1
 if %errorlevel% neq 0 (
@@ -22,33 +20,26 @@ if %errorlevel% neq 0 (
     exit /b
 )
 
-REM Инициализируем переменную для отслеживания наличия устройств
 set "DEVICES_FOUND=0"
 
-REM Включаем расширение переменных
 setlocal enabledelayedexpansion
 
-REM Получаем список всех запущенных устройств
 echo Получение списка запущенных устройств...
 adb devices
 
-REM Выполняем команду adb devices и обрабатываем её вывод
 for /f "skip=1 tokens=1,2 delims=	" %%a in ('adb devices') do (
     echo Обработка строки: %%a %%b
     if "%%b"=="device" (
         set "DEVICES_FOUND=1"
         echo Устройство найдено: %%a
 
-        REM Проверка подключения к устройству
         adb -s %%a get-state >nul 2>&1
         if !errorlevel! equ 0 (
             echo Подключение к устройству %%a успешно.
 
-            REM Очистка логов в указанной директории
             echo Очистка логов в %LOG_PATH% на устройстве %%a...
             adb -s %%a shell rm -rf %LOG_PATH%
 
-            REM Проверка результата
             if !errorlevel! equ 0 (
                 echo Логи успешно очищены на устройстве %%a.
             ) else (
@@ -62,7 +53,6 @@ for /f "skip=1 tokens=1,2 delims=	" %%a in ('adb devices') do (
     )
 )
 
-REM Проверяем, были ли найдены устройства
 if %DEVICES_FOUND% equ 0 (
     echo Нет подключенных устройств или эмуляторов.
 )
@@ -71,5 +61,4 @@ echo ==================================================
 echo               ОЧИСТКА ЗАВЕРШЕНА by @Dekoo
 echo ==================================================
 
-REM Ожидаем нажатия клавиши для завершения
 pause
